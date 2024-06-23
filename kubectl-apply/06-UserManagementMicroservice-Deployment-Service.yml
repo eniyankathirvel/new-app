@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: usermgmt-microservice
+  labels:
+    app: usermgmt-restapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: usermgmt-restapp
+  template:  
+    metadata:
+      labels: 
+        app: usermgmt-restapp
+    spec:
+      containers:
+        - name: usermgmt-restapp
+          image: 304520711562.dkr.ecr.us-east-1.amazonaws.com/new-app:1.1
+          ports: 
+            - containerPort: 8080           
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://db:5432/postgres"            
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "root"            
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "admin"           

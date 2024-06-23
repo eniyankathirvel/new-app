@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: CRUD_SpringBoot_PostgreSQL
+  profiles:
+    active: dev
+#    active: @spring.profiles.active@
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+#Cấu hình swagger trong spring boot
+open:
+  api:
+    title: CRUD Spring Boot PostgreSQL
+    description: CRUD Spring Boot PostgreSQL
+    version: 1.0.0
+    serverUrl: https://localhost:8080
+    serverName: server test
+---
+server:
+  port: 8080
+spring:
+  config:
+    activate:
+      on-profile: dev
+#Cấu hình swagger trong spring boot
+open:
+  api:
+    title: CRUD Spring Boot PostgreSQL
+    description: CRUD Spring Boot PostgreSQL
+    version: 1.0.0
+    serverUrl: https://localhost:${server.port}
+    serverName: server test
+---
+server:
+  port: 8082
+spring:
+  config:
+    activate:
+      on-profile: product
+#Cấu hình swagger trong spring boot
+open:
+  api:
+    title: CRUD Spring Boot PostgreSQL
+    description: CRUD Spring Boot PostgreSQL
+    version: 1.0.0
+    serverUrl: https://localhost:${server.port}
+    serverName: server test
