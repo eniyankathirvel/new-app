@@ -75,7 +75,7 @@ jobs:
     - name: Build, tag docker image
       env:
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        REPOSITORY: app1
+        REPOSITORY: new-app
         IMAGE_TAG: 1.1
       run: |
         docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
@@ -83,14 +83,14 @@ jobs:
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@0.20.0
       with:
-        image-ref: ${{ steps.login-ecr.outputs.registry }}/app1:1.1
+        image-ref: ${{ steps.login-ecr.outputs.registry }}/new-app:1.1
         format: 'sarif'
         output: 'trivy-results-1.sarif'
 
     - name: Push docker image to Amazon ECR
       env:
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        REPOSITORY: app1
+        REPOSITORY: new-app
         IMAGE_TAG: 1.1
       run: |
         docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
