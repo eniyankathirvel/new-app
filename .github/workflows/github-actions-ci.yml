@@ -1,4 +1,4 @@
-name: Node js app deploy to EKS
+name: Sample usermgmt app deploy to EKS
 on:
   push:
     branches: [ "main" ]
@@ -17,7 +17,7 @@ jobs:
   
   security-checks:
     runs-on: ubuntu-latest
-
+    needs: clone-code
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
