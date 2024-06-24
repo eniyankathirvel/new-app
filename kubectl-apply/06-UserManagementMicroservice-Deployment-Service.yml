@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment 
 metadata:
-  name: usermgmt-microservice
+  name: usermgmt-restapp
   labels:
     app: usermgmt-restapp
 spec:
@@ -21,8 +21,8 @@ spec:
             - containerPort: 8080           
           env:
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://db:5432/postgres"            
+              value: "jdbc:postgresql://postgres:5432/postgres"           
             - name: SPRING_DATASOURCE_USERNAME
               value: "root"            
             - name: SPRING_DATASOURCE_PASSWORD
-              value: "admin"           
+              value: "admin"
