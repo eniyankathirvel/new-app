@@ -127,7 +127,4 @@ jobs:
     
     - name: Deploy to EKS using Helm
       run: |
-        helm upgrade --install myrelease ./mychart \
-          --set postgres.image=${{ secrets.POSTGRES_IMAGE }} \
-          --set usermgmt.image=${{ secrets.USERMGMT_IMAGE }} \
-          --set usermgmt.env.dbPassword=${{ secrets.DB_PASSWORD }}
+        helm upgrade --install myrelease ./mychart
