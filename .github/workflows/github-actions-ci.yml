@@ -117,9 +117,17 @@ jobs:
       with:
         version: 'v1.30.0' # default is latest stable
 
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.7.1
+
     - name: Update kube config
       run: aws eks update-kubeconfig --name eniyan-eks
     
-    - name: Deploy to EKS
+    - name: Deploy to EKS using Helm
       run: |
-        kubectl apply -f kubectl-apply/
+        helm upgrade --install myrelease ./mychart \
+          --set postgres.image=${{ secrets.POSTGRES_IMAGE }} \
+          --set usermgmt.image=${{ secrets.USERMGMT_IMAGE }} \
+          --set usermgmt.env.dbPassword=${{ secrets.DB_PASSWORD }}

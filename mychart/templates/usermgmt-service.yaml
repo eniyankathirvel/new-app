@@ -1,0 +1,15 @@
+# templates/usermgmt-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: usermgmt-restapp
+  labels:
+    app: usermgmt-restapp
+spec:
+  type: NodePort
+  selector:
+    app: usermgmt-restapp
+  ports:
+    - port: {{ .Values.usermgmt.servicePort }}
+      targetPort: {{ .Values.usermgmt.servicePort }}
+      nodePort: {{ .Values.usermgmt.nodePort }}

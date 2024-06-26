@@ -1,0 +1,29 @@
+# templates/usermgmt-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: usermgmt-restapp
+  labels:
+    app: usermgmt-restapp
+spec:
+  replicas: {{ .Values.usermgmt.replicas }}
+  selector:
+    matchLabels:
+      app: usermgmt-restapp
+  template:
+    metadata:
+      labels:
+        app: usermgmt-restapp
+    spec:
+      containers:
+        - name: usermgmt-restapp
+          image: {{ .Values.usermgmt.image }}
+          ports:
+            - containerPort: {{ .Values.usermgmt.servicePort }}
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: {{ .Values.usermgmt.env.dbUrl }}
+            - name: SPRING_DATASOURCE_USERNAME
+              value: {{ .Values.usermgmt.env.dbUser }}
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ .Values.usermgmt.env.dbPassword }}

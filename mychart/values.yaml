@@ -1,0 +1,24 @@
+# values.yaml
+storageClassName: ebs-sc
+storageRequest: 4Gi
+
+postgres:
+  image: postgres
+  replicas: 2
+  env:
+    user: root
+    password: admin
+    db: postgres
+    pgdata: /var/lib/postgresql/data/pgdata
+  servicePort: 5432
+  claimName: ebs-mysql-pv-claim
+
+usermgmt:
+  image: 304520711562.dkr.ecr.us-east-1.amazonaws.com/new-app:1.1
+  replicas: 1
+  servicePort: 8080
+  nodePort: 31232
+  env:
+    dbUrl: "jdbc:postgresql://postgres:5432/postgres"
+    dbUser: root
+    dbPassword: admin

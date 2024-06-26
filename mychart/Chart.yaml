@@ -1,0 +1,6 @@
+# mychart/Chart.yaml
+apiVersion: v2
+name: mychart
+description: A Helm chart for deploying usermgmt app and postgres to EKS
+version: 0.1.0
+appVersion: 1.0
