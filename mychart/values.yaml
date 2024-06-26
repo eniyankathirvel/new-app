@@ -3,7 +3,7 @@ storageClassName: ebs-sc
 storageRequest: 4Gi
 
 postgres:
-  image: postgres
+  image: postgres:latest
   replicas: 2
   env:
     user: root
