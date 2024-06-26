@@ -124,7 +124,14 @@ jobs:
 
     - name: Update kube config
       run: aws eks update-kubeconfig --name eniyan-eks
+
+    - name: Ensure namespace exists
+      run: |
+        if ! kubectl get namespace $namespace; then
+          kubectl create namespace $namespace
+        fi
     
+  
     - name: Deploy to EKS using Helm
       run: |
-        helm upgrade --install myrelease ./mychart --set postgres.image=postgres --set usermgmt.image=304520711562.dkr.ecr.us-east-1.amazonaws.com/new-app:1.1 --set usermgmt.env.dbPassword=admin
+        helm upgrade --install myrelease ./mychart --namespace $namespace --set postgres.image=postgres --set usermgmt.image=304520711562.dkr.ecr.us-east-1.amazonaws.com/new-app:1.1 --set usermgmt.env.dbPassword=admin
