@@ -12,4 +12,3 @@ spec:
   ports:
     - port: {{ .Values.usermgmt.servicePort }}
       targetPort: {{ .Values.usermgmt.servicePort }}
-      nodePort: {{ .Values.usermgmt.nodePort }}

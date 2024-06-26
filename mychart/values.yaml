@@ -17,7 +17,6 @@ usermgmt:
   image: 304520711562.dkr.ecr.us-east-1.amazonaws.com/new-app:1.1
   replicas: 1
   servicePort: 8080
-  nodePort: 31232
   env:
     dbUrl: "jdbc:postgresql://postgres:5432/postgres"
     dbUser: root
