@@ -1,5 +1,5 @@
 # values.yaml
-storageClassName: ebs-sc
+storageClassName: ebs-sc-pg
 storageRequest: 4Gi
 
 postgres:
