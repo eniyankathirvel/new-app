@@ -134,4 +134,4 @@ jobs:
   
     - name: Deploy to EKS using Helm
       run: |
-        helm upgrade --install myrelease ./mychart
+        helm upgrade --install myrelease ./mychart --namespace eniyan
