@@ -1,0 +1,12 @@
+# templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ebs-mysql-pv-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.storageClassName }}
+  resources:
+    requests:
+      storage: {{ .Values.storageRequest }}
