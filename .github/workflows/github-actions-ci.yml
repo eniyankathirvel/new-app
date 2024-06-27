@@ -134,4 +134,4 @@ jobs:
   
     - name: Deploy to EKS using Helm
       run: |
-        helm upgrade --install myrelease ./mychart --namespace eniyan --set postgres.image=postgres --set usermgmt.image=304520711562.dkr.ecr.us-east-1.amazonaws.com/new-app:1.1 --set usermgmt.env.dbPassword=admin
+        helm upgrade --install myrelease ./mychart
