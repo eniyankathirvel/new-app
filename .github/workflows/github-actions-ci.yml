@@ -7,167 +7,124 @@ on:
 
 jobs:
 
-  trufflehog-check:
+  security-checks:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-      - name: Install TruffleHog
-        id: trufflehog
-        continue-on-error: true
-        run: |
-          docker run --rm -v "$GITHUB_WORKSPACE:/tmp" trufflesecurity/trufflehog:latest --fail --no-update git file:///tmp/ > trufflehog_output.txt
-          cat trufflehog_output.txt
+    - name: Install TruffleHog
+      id: trufflehog
+      continue-on-error: true
+      run: |
+        docker run --rm -v "$GITHUB_WORKSPACE:/tmp" trufflesecurity/trufflehog:latest --fail --no-update git file:///tmp/ > trufflehog_output.txt
+        cat trufflehog_output.txt
+    
+    - name: Make mvnw executable
+      run: chmod +x ./mvnw
 
-      - name: Upload TruffleHog Output
-        uses: actions/upload-artifact@v3
-        with:
-          name: trufflehog-output
-          path: trufflehog_output.txt
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/maven@master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-  sast-check:
+    - name: SAST-SEMGREP
+      env:           
+        SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+      run: |
+        python3 -m pip install semgrep
+        semgrep login
+        semgrep ci
+
+  build-and-scan:
     runs-on: ubuntu-latest
-    needs: trufflehog-check
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: SAST-SEMGREP
-        env:           
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-        run: |
-          python3 -m pip install semgrep
-          semgrep login
-          semgrep ci > semgrep_output.txt
-
-      - name: Upload Semgrep Output
-        uses: actions/upload-artifact@v3
-        with:
-          name: semgrep-output
-          path: semgrep_output.txt
-
-  sca-check:
-    runs-on: ubuntu-latest
-    needs: trufflehog-check
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Make mvnw executable
-        run: chmod +x ./mvnw
-
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/maven@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-  build:
-    runs-on: ubuntu-latest
-    needs: trufflehog-check
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v2.0
-        with:
-          version: 'v1.30.0' # default is latest stable
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v2.0
+      with:
+        version: 'v1.30.0' # default is latest stable
+      id: install
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag docker image
-        env:
-          REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-          REPOSITORY: new-app
-          IMAGE_TAG: 1.1
-        run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+    - name: Build, tag docker image
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REPOSITORY: new-app
+        IMAGE_TAG: 1.1
+      run: |
+        docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
 
-  trivy-scan:
-    runs-on: ubuntu-latest
-    needs: build
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.20.0
+      with:
+        image-ref: ${{ steps.login-ecr.outputs.registry }}/new-app:1.1
+        format: 'sarif'
+        output: 'trivy-results-1.sarif'
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/new-app:1.1
-          format: 'sarif'
-          output: 'trivy-results-1.sarif'
-
-      - name: Upload Trivy Scan Results
-        uses: actions/upload-artifact@v3
-        with:
-          name: trivy-scan-results
-          path: trivy-results-1.sarif
+    - name: Push docker image to Amazon ECR
+      env:
+        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        REPOSITORY: new-app
+        IMAGE_TAG: 1.1
+      run: |
+        docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
   deploy:
     runs-on: ubuntu-latest
-    needs: trivy-scan
+    needs: build-and-scan
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v2.0
-        with:
-          version: 'v1.30.0' # default is latest stable
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v2.0
+      with:
+        version: 'v1.30.0' # default is latest stable
 
-      - name: Install Helm
-        uses: azure/setup-helm@v1
-        with:
-          version: v3.7.1
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+      with:
+        version: v3.7.1
 
-      - name: Update kube config
-        run: aws eks update-kubeconfig --name eniyan-eks
+    - name: Update kube config
+      run: aws eks update-kubeconfig --name eniyan-eks
 
-      - name: Ensure namespace exists
-        run: |
-          if ! kubectl get namespace eniyan; then
-            kubectl create namespace eniyan
-          fi
+    - name: Ensure namespace exists
+      run: |
+        if ! kubectl get namespace eniyan; then
+          kubectl create namespace eniyan
+        fi
     
-      - name: Deploy to EKS using Helm
-        run: |
-          helm upgrade --install myrelease ./mychart --namespace eniyan
+  
+    - name: Deploy to EKS using Helm
+      run: |
+        helm upgrade --install myrelease ./mychart --namespace eniyan
