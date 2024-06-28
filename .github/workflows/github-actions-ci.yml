@@ -6,18 +6,9 @@ on:
     branches: [ "main" ]
 
 jobs:
-  clone-code:
-    runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-  
   security-checks:
     runs-on: ubuntu-latest
-    needs: clone-code
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -50,7 +41,7 @@ jobs:
 
   build-and-scan:
     runs-on: ubuntu-latest
-    needs: clone-code
+    needs: security-checks
 
     steps:
     - name: Checkout code
