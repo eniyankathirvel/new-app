@@ -30,6 +30,9 @@ jobs:
       run: |
         docker run --rm -v "$GITHUB_WORKSPACE:/tmp" trufflesecurity/trufflehog:latest --fail --no-update git file:///tmp/ > trufflehog_output.txt
         cat trufflehog_output.txt
+    
+    - name: Make mvnw executable
+      run: chmod +x ./mvnw
 
     - name: Run Snyk to check for vulnerabilities
       uses: snyk/actions/maven@master
