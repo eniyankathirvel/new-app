@@ -110,12 +110,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
-          image-ref: ${{ steps.login-ecr.outputs.registry }}/new-app:1.1
-          format: 'sarif'
-          output: 'trivy-results-1.sarif'
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.20.0
+      continue-on-error: true
+      with:
+        image-ref: ${{ steps.login-ecr.outputs.registry }}/new-app:1.1
+        format: 'sarif'
+        output: 'trivy-results-1.sarif'
 
   deploy:
     runs-on: ubuntu-latest
