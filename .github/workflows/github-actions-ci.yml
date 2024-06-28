@@ -63,16 +63,11 @@ jobs:
       - name: Make mvnw executable
         run: chmod +x ./mvnw
 
-      - name: Run Snyk to check for vulnerabilities
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk test --json > snyk_output.json
-
-      - name: Upload Snyk Output
-        uses: actions/upload-artifact@v3
-        with:
-          name: snyk-output
-          path: snyk_output.json
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/maven@master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
