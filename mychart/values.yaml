@@ -21,3 +21,13 @@ usermgmt:
     dbUrl: "jdbc:postgresql://postgres:5432/postgres"
     dbUser: root
     dbPassword: admin
+
+ingress:
+  name: usermgmt-restapp-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+  service:
+    name: usermgmt-restapp
+    port: 80
