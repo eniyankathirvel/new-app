@@ -24,8 +24,13 @@ metadata:
   name: usermgmt-restapp-ing
   annotations:
     kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/load-balancer-name: albingress
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: instance
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP 
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    alb.ingress.kubernetes.io/healthcheck-path: /api/v1/employees  
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
 spec:
   rules:
     - http:
