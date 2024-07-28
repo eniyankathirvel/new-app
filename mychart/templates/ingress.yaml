@@ -31,14 +31,21 @@ metadata:
     alb.ingress.kubernetes.io/healthcheck-port: traffic-port
     alb.ingress.kubernetes.io/healthcheck-path: /api/v1/employees  
     alb.ingress.kubernetes.io/healthcheck-interval-seconds: '15'
+# spec:
+#   rules:
+#     - http:
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: usermgmt-restapp
+#                 port: 
+#                   number: 80
 spec:
-  rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: usermgmt-restapp
-                port: 
-                  number: 80
+  #ingressClassName: my-aws-ingress-class # Ingress Class
+  defaultBackend:
+    service:
+      name: usermgmt-restapp
+      port:
+        number: 80  

@@ -6,7 +6,7 @@ metadata:
   labels:
     app: usermgmt-restapp
 spec:
-  #type: 
+  type: NodePort
   selector:
     app: usermgmt-restapp
   ports:
