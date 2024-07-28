@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-ingressgateway
+  namespace: eniyan
+spec:
+  type: ExternalName
+  externalName: istio-ingressgateway.istio-system.svc.cluster.local
+  ports:
+    - port: 80
+      targetPort: 80
+    - port: 443
+      targetPort: 443
