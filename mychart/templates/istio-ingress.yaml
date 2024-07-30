@@ -14,7 +14,7 @@ metadata:
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/healthcheck-path: /healthz/ready
     alb.ingress.kubernetes.io/healthcheck-port: "15021"
-    alb.ingress.kubernetes.io/target-group-attributes: preserve_client_ip.enabled=true
+    #alb.ingress.kubernetes.io/target-group-attributes: preserve_client_ip.enabled=true
 spec:
   rules:
   - http:
@@ -23,6 +23,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: istio-ingressgateway
+            name: istio-ingressgateway.istio-system
             port: 
               number: 80
